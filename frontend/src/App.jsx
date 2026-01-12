@@ -27,7 +27,7 @@ function App() {
   const token = localStorage.getItem("token");
 
   // 🔥 Enable/Disable maintenance mode here
-  const maintenanceMode = true; // set to false to turn OFF the block
+  const maintenanceMode = false; // set to true to turn ON the block
 
   return (
     <Router>

@@ -1,84 +1,101 @@
-import React, { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ArrowRight, ShieldCheck, Users, Zap } from "lucide-react";
 
 function Welcome() {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setIsLoaded(true);
+    setLoaded(true);
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center text-white font-sans relative overflow-hidden bg-slate-900">
-      {/* Clean professional background */}
+    <div className="relative min-h-screen bg-slate-950 text-white overflow-hidden font-sans">
+      
+      {/* Background gradients */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-black" />
-        <div 
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
-          }}
-        />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-3xl" />
+        <div className="absolute top-40 -right-40 w-[600px] h-[600px] bg-cyan-500/20 rounded-full blur-3xl" />
       </div>
 
-      {/* Main content */}
-      <div className={`relative z-10 text-center max-w-4xl w-full p-8 transition-all duration-800 ${
-        isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-      }`}>
+      {/* Main container */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
         
-        {/* Clean, professional logo */}
-        <div className="mb-6">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-8">
-            <span className="text-blue-500">Sync</span>Space
+        {/* LEFT CONTENT */}
+        <div
+          className={`transition-all duration-700 ${
+            loaded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+          }`}
+        >
+          <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6">
+            Work smarter with  
+            <span className="block text-indigo-400">SyncSpace</span>
           </h1>
-          
-          {/* Professional tagline */}
-          <p className="text-xl md:text-2xl text-slate-300 font-light max-w-2xl mx-auto leading-relaxed">
-            Professional collaboration platform for modern teams
-          </p>
-        </div>
 
-        {/* Clean description */}
-        <div className="mb-10">
-          <p className="text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto">
-            Streamline your workflow with powerful tools designed for productivity, 
-            security, and seamless team collaboration.
+          <p className="text-lg text-slate-300 max-w-xl mb-10">
+            A next-generation collaboration platform built for speed, security,
+            and high-performance teams.
           </p>
-        </div>
 
-        {/* Professional CTA button */}
-        <div className="flex justify-center">
-          <button
-            onClick={() => window.location.href = '/login'}
-            className="group inline-flex items-center justify-center px-2 py-1 text-lg font-semibold rounded-lg text-white bg-blue-800 hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            <span className="flex items-center gap-2">
+          {/* CTA */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => (window.location.href = "/login")}
+              className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition shadow-lg"
+            >
               Get Started
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
+            </button>
+
+            <span className="text-sm text-slate-400">
+              No credit card required
             </span>
-          </button>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="mt-14 grid grid-cols-3 gap-6 max-w-lg">
+            <Feature icon={<ShieldCheck />} text="Secure by design" />
+            <Feature icon={<Zap />} text="Lightning fast" />
+            <Feature icon={<Users />} text="Team focused" />
+          </div>
         </div>
 
-        {/* Professional feature indicators */}
-        <div className="mt-16 flex justify-center items-center gap-8 text-slate-500">
-          <div className="flex items-center gap-2 text-sm">
-       
-            <span></span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-          
-            <span></span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-          
-            <span></span>
+        {/* RIGHT VISUAL PANEL */}
+        <div
+          className={`transition-all duration-700 ${
+            loaded ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
+          }`}
+        >
+          <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+            
+            <div className="h-4 w-20 bg-indigo-500 rounded mb-6" />
+
+            <div className="space-y-4">
+              <div className="h-4 bg-slate-700 rounded w-3/4" />
+              <div className="h-4 bg-slate-700 rounded w-full" />
+              <div className="h-4 bg-slate-700 rounded w-5/6" />
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="h-24 rounded-lg bg-indigo-500/20" />
+              <div className="h-24 rounded-lg bg-cyan-500/20" />
+            </div>
+
+            <p className="mt-6 text-sm text-slate-400">
+              Live workspace preview
+            </p>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* Small reusable feature block */
+function Feature({ icon, text }) {
+  return (
+    <div className="flex items-center gap-2 text-slate-300 text-sm">
+      <span className="text-indigo-400">{icon}</span>
+      {text}
     </div>
   );
 }

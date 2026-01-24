@@ -1,91 +1,30 @@
+// src/pages/Dashboard.jsx
+
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { 
-    FiLogOut, FiCopy, FiAlertCircle, 
-    FiCheckCircle, FiArrowRight, FiInbox, FiUsers, FiTrash, FiEdit,
-    FiPlusCircle, FiLink, FiBell, FiX
+import {
+    FiLogOut, FiCopy, FiAlertCircle,
+    FiCheckCircle, FiArrowRight, FiInbox, FiUsers, FiTrash, FiEdit
 } from 'react-icons/fi';
-import Modal from "../components/Modal"; 
-import io from 'socket.io-client';
+import Modal from "../components/Modal"; // Corrected import path
 
 // --- Constants ---
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 const BACKEND_BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:5000';
-const socket = io(BACKEND_BASE); // Central socket instance
 
 // =================================================================================
-// --- Reusable UI Components ---
+// --- UI Components ---
 // =================================================================================
 
-/**
- * @description Notifications dropdown component.
- */
-const NotificationsDropdown = ({ notifications, onMarkAsRead, onClose }) => {
-    const unreadNotifications = notifications.filter(n => !n.readStatus);
-
-    return (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-50">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <h4 className="text-lg font-bold">Notifications ({unreadNotifications.length})</h4>
-                <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition">
-                    <FiX size={20} />
-                </button>
-            </div>
-            <div className="py-2">
-                <div className="max-h-80 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                        <p className="text-center text-gray-500 text-sm p-4">No new notifications.</p>
-                    ) : (
-                        <ul className="divide-y divide-gray-200">
-                            {notifications.map(notif => (
-                                <li 
-                                    key={notif._id} 
-                                    className={`flex items-start p-4 transition-colors ${!notif.readStatus ? 'bg-blue-50 hover:bg-blue-100' : 'bg-white hover:bg-gray-50'}`}
-                                >
-                                    <div className="flex-grow">
-                                        <p className="text-sm">{notif.message}</p>
-                                        <span className="text-xs text-gray-500">{new Date(notif.createdAt).toLocaleString()}</span>
-                                        {!notif.readStatus && (
-                                            <button onClick={() => onMarkAsRead(notif._id)} className="ml-2 text-xs text-blue-500 hover:underline">
-                                                Mark as Read
-                                            </button>
-                                        )}
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-/**
- * @description Application header with user profile and logout button.
- */
-const Header = ({ user, onLogout, unreadCount, onToggleNotifications }) => (
-    <header className="bg-white/90 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-slate-200">
+const Header = ({ user, onLogout }) => (
+    <header className="bg-grey/90 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-slate-200">
         <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center">
-                <Link to="/dashboard" className="text-2xl font-bold text-indigo-600 tracking-tight">
-                    SyncSpace
+                <Link to="/dashboard" className="text-2xl md:text-3xl font-bold tracking-tigh">
+                     <span className="text-indigo-600">Sync</span>Space
                 </Link>
                 <div className="flex items-center gap-4">
-                    <div className="relative">
-                        <button 
-                            onClick={onToggleNotifications} 
-                            className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition-colors relative"
-                        >
-                            <FiBell size={24} />
-                            {unreadCount > 0 && (
-                                <span className="absolute top-1 right-1 h-3 w-3 flex items-center justify-center text-[10px] text-white rounded-full bg-red-500">
-                                    {unreadCount}
-                                </span>
-                            )}
-                        </button>
-                    </div>
                     <Link to="/profile" className="flex items-center gap-3 group">
                         <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 hidden sm:block transition-colors">
                             {user?.username}
@@ -109,9 +48,6 @@ const Header = ({ user, onLogout, unreadCount, onToggleNotifications }) => (
     </header>
 );
 
-/**
- * @description A card representing a single workspace.
- */
 const WorkspaceCard = ({ workspace, isAdmin, onCopyInvite, onUpdate, onDelete }) => {
     const inviteLink = `${window.location.origin}/join/${workspace._id}`;
 
@@ -136,14 +72,14 @@ const WorkspaceCard = ({ workspace, isAdmin, onCopyInvite, onUpdate, onDelete })
                 {isAdmin && (
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={(e) => { e.preventDefault(); onUpdate(workspace); }}
+                            onClick={() => onUpdate(workspace)}
                             className="text-slate-500 hover:text-blue-500 transition"
                             title="Update name"
                         >
                             <FiEdit size={16} />
                         </button>
                         <button
-                            onClick={(e) => { e.preventDefault(); onDelete(workspace); }}
+                            onClick={() => onDelete(workspace)}
                             className="text-slate-500 hover:text-red-500 transition"
                             title="Delete workspace"
                         >
@@ -167,9 +103,6 @@ const WorkspaceCard = ({ workspace, isAdmin, onCopyInvite, onUpdate, onDelete })
     );
 };
 
-/**
- * @description Animated toast notification for user feedback.
- */
 const Toast = ({ message, type, show }) => {
     const [isVisible, setIsVisible] = useState(false);
 
@@ -188,7 +121,7 @@ const Toast = ({ message, type, show }) => {
     const errorStyles = 'bg-red-500 border-red-600';
 
     return (
-        <div 
+        <div
             className={`fixed top-5 right-5 z-[100] flex items-center p-4 rounded-lg shadow-2xl text-white border-2 transition-all duration-300 ease-in-out
                 ${type === 'success' ? successStyles : errorStyles}
                 ${show ? 'transform translate-y-0 opacity-100' : 'transform -translate-y-5 opacity-0'}`}
@@ -199,9 +132,6 @@ const Toast = ({ message, type, show }) => {
     );
 };
 
-/**
- * @description Panel for joining or creating workspaces.
- */
 const ActionPanel = ({ onJoin, onAdminCreate, isAdmin }) => {
     const [inviteLink, setInviteLink] = useState("");
     const [workspaceName, setWorkspaceName] = useState("");
@@ -259,9 +189,6 @@ const ActionPanel = ({ onJoin, onAdminCreate, isAdmin }) => {
     );
 };
 
-/**
- * @description A grid of skeleton loaders for the workspace cards.
- */
 const WorkspaceGridSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(3)].map((_, i) => (
@@ -275,9 +202,6 @@ const WorkspaceGridSkeleton = () => (
     </div>
 );
 
-/**
- * @description A message shown when the user has no workspaces.
- */
 const EmptyState = () => (
     <div className="text-center py-16 border-2 border-dashed border-slate-300 rounded-lg bg-white">
         <FiInbox className="mx-auto h-12 w-12 text-slate-400" />
@@ -289,8 +213,8 @@ const EmptyState = () => (
 // =================================================================================
 // --- Main Dashboard Component ---
 // =================================================================================
+
 function Dashboard() {
-    // --- State Management ---
     const [workspaces, setWorkspaces] = useState([]);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -304,30 +228,17 @@ function Dashboard() {
     const [workspaceToUpdate, setWorkspaceToUpdate] = useState(null);
     const [newWorkspaceName, setNewWorkspaceName] = useState("");
 
-    // --- ✅ NOTIFICATION STATE ---
-    const [notifications, setNotifications] = useState([]);
-    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-
-    // --- Side Effects ---
     const fetchDashboardData = useCallback(async (token) => {
         try {
-            const [userRes, workspacesRes, notificationsRes] = await Promise.all([
+            const [userRes, workspacesRes] = await Promise.all([
                 axios.get(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_BASE}/workspaces/my`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_BASE}/notifications/my`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${API_BASE}/workspaces/my`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
-            
             setUser(userRes.data);
             setWorkspaces(workspacesRes.data);
-            setNotifications(notificationsRes.data);
-
-            if (userRes.data?._id) {
-                socket.emit('register_user', userRes.data._id);
-            }
-
         } catch (err) {
             console.error("Error fetching dashboard data:", err);
-            showToast("Session expired. Please log in again.", "error");
+            showToast("Session expired. Please log in again.");
             localStorage.removeItem("token");
             setTimeout(() => navigate("/login"), 2000);
         } finally {
@@ -344,50 +255,15 @@ function Dashboard() {
         fetchDashboardData(token);
     }, [fetchDashboardData, navigate]);
 
-    useEffect(() => {
-        const handleNewNotification = (newNotification) => {
-            setNotifications(prev => [newNotification, ...prev]);
-            showToast("You have a new notification!", "success");
-        };
-
-        socket.on('new_notification', handleNewNotification);
-
-        return () => {
-            socket.off('new_notification', handleNewNotification);
-        };
-    }, []);
-
-    // --- Helper Functions & Event Handlers ---
-    const showToast = (message, type = 'success') => {
+    const showToast = (message, type = 'error') => {
         setToast({ show: true, message, type });
-        setTimeout(() => setToast({ show: false, message: '', type }), 3000);
-    };
-
-    const handleToggleNotifications = () => {
-        setIsNotificationsOpen(prev => !prev);
-    };
-
-    const handleMarkAsRead = async (notificationId) => {
-        const token = localStorage.getItem("token");
-        try {
-            await axios.put(
-                `${API_BASE}/notifications/mark-read/${notificationId}`,
-                {},
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setNotifications(prev =>
-                prev.map(n => (n._id === notificationId ? { ...n, readStatus: true } : n))
-            );
-        } catch (err) {
-            console.error("Failed to mark notification as read:", err);
-            showToast("Could not update notification.", "error");
-        }
+        setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
     };
 
     const handleCreateWorkspace = async (workspaceName) => {
         const token = localStorage.getItem("token");
         if (!workspaceName.trim()) {
-            showToast("Workspace name cannot be empty.", "error");
+            showToast("Workspace name cannot be empty.");
             return;
         }
         try {
@@ -399,15 +275,20 @@ function Dashboard() {
             setWorkspaces(prev => [...prev, res.data.workspace]);
             showToast("Workspace created successfully!", "success");
         } catch (err) {
-            showToast(err.response?.data?.msg || "Failed to create workspace.", "error");
+            console.error("Error creating workspace:", err.response?.data || err);
+            showToast(err.response?.data?.msg || "Failed to create workspace.");
         }
     };
 
     const handleJoinByLink = async (inviteLink) => {
         const token = localStorage.getItem("token");
+        if (!inviteLink.trim()) {
+            showToast("Please paste a valid invite link.");
+            return;
+        }
         const inviteCode = inviteLink.split("/").pop();
         if (!inviteCode) {
-            showToast("Invalid invite link format.", "error");
+            showToast("Invalid invite link format.");
             return;
         }
         try {
@@ -420,7 +301,8 @@ function Dashboard() {
             }
             showToast("Successfully joined workspace!", "success");
         } catch (err) {
-            showToast(err.response?.data?.msg || "Failed to join workspace.", "error");
+            console.error("Error joining workspace:", err.response?.data || err);
+            showToast(err.response?.data?.msg || "Failed to join workspace.");
         }
     };
 
@@ -435,10 +317,17 @@ function Dashboard() {
         setNewWorkspaceName(workspace.name);
         setIsUpdateModalOpen(true);
     };
-    const closeUpdateModal = () => setIsUpdateModalOpen(false);
-    
+    const closeUpdateModal = () => {
+        setIsUpdateModalOpen(false);
+        setWorkspaceToUpdate(null);
+        setNewWorkspaceName("");
+    };
     const confirmUpdateWorkspace = async (e) => {
         e.preventDefault();
+        if (!workspaceToUpdate || !newWorkspaceName.trim()) {
+            showToast("Workspace name cannot be empty.");
+            return;
+        }
         const token = localStorage.getItem("token");
         try {
             const res = await axios.put(
@@ -451,7 +340,7 @@ function Dashboard() {
             ));
             showToast("Workspace name updated!", "success");
         } catch (err) {
-            showToast(err.response?.data?.msg || "Failed to update workspace name.", "error");
+            showToast(err.response?.data?.msg || "Failed to update workspace name.");
         } finally {
             closeUpdateModal();
         }
@@ -461,9 +350,12 @@ function Dashboard() {
         setWorkspaceToDelete(workspace);
         setIsDeleteModalOpen(true);
     };
-    const closeDeleteModal = () => setIsDeleteModalOpen(false);
-
+    const closeDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+        setWorkspaceToDelete(null);
+    };
     const confirmDeleteWorkspace = async () => {
+        if (!workspaceToDelete) return;
         const token = localStorage.getItem("token");
         try {
             await axios.delete(
@@ -473,7 +365,7 @@ function Dashboard() {
             setWorkspaces(prev => prev.filter(ws => ws._id !== workspaceToDelete._id));
             showToast("Workspace deleted successfully!", "success");
         } catch (err) {
-            showToast(err.response?.data?.msg || "Failed to delete workspace.", "error");
+            showToast(err.response?.data?.msg || "Failed to delete workspace.");
         } finally {
             closeDeleteModal();
         }
@@ -485,8 +377,12 @@ function Dashboard() {
     };
 
     const renderWorkspaceContent = () => {
-        if (loading) return <WorkspaceGridSkeleton />;
-        if (workspaces.length === 0) return <EmptyState />;
+        if (loading) {
+            return <WorkspaceGridSkeleton />;
+        }
+        if (workspaces.length === 0) {
+            return <EmptyState />;
+        }
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {workspaces.map((ws) => (
@@ -503,30 +399,13 @@ function Dashboard() {
         );
     };
 
-    const unreadCount = notifications.filter(n => !n.readStatus).length;
-
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
-            <Header 
-                user={user} 
-                onLogout={handleLogout}
-                unreadCount={unreadCount}
-                onToggleNotifications={handleToggleNotifications}
-            />
+            <Header user={user} onLogout={handleLogout} />
             <Toast message={toast.message} type={toast.type} show={toast.show} />
 
-            <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative">
-                {isNotificationsOpen && (
-                   <div className="absolute top-0 right-4 sm:right-6 lg:right-8 z-50">
-                       <NotificationsDropdown 
-                           notifications={notifications}
-                           onMarkAsRead={handleMarkAsRead}
-                           onClose={() => setIsNotificationsOpen(false)}
-                       />
-                   </div>
-                )}
-                
-                <ActionPanel 
+            <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                <ActionPanel
                     onJoin={handleJoinByLink}
                     onAdminCreate={handleCreateWorkspace}
                     isAdmin={user?.role === "admin"}
@@ -551,10 +430,16 @@ function Dashboard() {
                     This action cannot be undone.
                 </p>
                 <div className="flex justify-end gap-3 mt-6">
-                    <button onClick={closeDeleteModal} className="px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-md hover:bg-slate-300 transition">
+                    <button
+                        onClick={closeDeleteModal}
+                        className="px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-md hover:bg-slate-300 transition"
+                    >
                         Cancel
                     </button>
-                    <button onClick={confirmDeleteWorkspace} className="px-4 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition">
+                    <button
+                        onClick={confirmDeleteWorkspace}
+                        className="px-4 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition"
+                    >
                         Delete
                     </button>
                 </div>
@@ -578,10 +463,17 @@ function Dashboard() {
                         autoFocus
                     />
                     <div className="flex justify-end gap-3 mt-6">
-                        <button type="button" onClick={closeUpdateModal} className="px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-md hover:bg-slate-300 transition">
+                        <button
+                            type="button"
+                            onClick={closeUpdateModal}
+                            className="px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-md hover:bg-slate-300 transition"
+                        >
                             Cancel
                         </button>
-                        <button type="submit" className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition">
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition"
+                        >
                             Save Changes
                         </button>
                     </div>
@@ -589,6 +481,6 @@ function Dashboard() {
             </Modal>
         </div>
     );
-}
+};
 
 export default Dashboard;

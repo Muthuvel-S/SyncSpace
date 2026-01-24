@@ -1,83 +1,65 @@
-import React, { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ArrowRight, ShieldCheck, Zap, Users, Layers } from "lucide-react";
 
 function Welcome() {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setIsLoaded(true);
+    setLoaded(true);
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center text-white font-sans relative overflow-hidden bg-slate-900">
-      {/* Clean professional background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-black" />
-        <div 
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
-          }}
-        />
-      </div>
-
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 font-sans">
       {/* Main content */}
-      <div className={`relative z-10 text-center max-w-4xl w-full p-8 transition-all duration-800 ${
-        isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-      }`}>
-        
-        {/* Clean, professional logo */}
-        <div className="mb-6">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-8">
-            <span className="text-blue-500">Sync</span>Space
-          </h1>
-          
-          {/* Professional tagline */}
-          <p className="text-xl md:text-2xl text-slate-300 font-light max-w-2xl mx-auto leading-relaxed">
-            Professional collaboration platform for modern teams
-          </p>
-        </div>
+      <div
+        className={`max-w-6xl mx-auto px-6 py-32 text-center transition-all duration-700 ${
+          loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+        }`}
+      >
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+          <span className="text-indigo-600">Sync</span>Space
+        </h1>
 
-        {/* Clean description */}
-        <div className="mb-10">
-          <p className="text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto">
-            Streamline your workflow with powerful tools designed for productivity, 
-            security, and seamless team collaboration.
-          </p>
-        </div>
+        <p className="text-xl md:text-2xl text-slate-600 mb-6">
+          A modern collaboration platform for high-performing teams
+        </p>
 
-        {/* Professional CTA button */}
-        <div className="flex justify-center">
+        <p className="text-base md:text-lg text-slate-500 max-w-3xl mx-auto mb-12">
+          Communicate clearly, automate workflows, and keep teams aligned —
+          all in one secure platform.
+        </p>
+
+        <div className="flex justify-center items-center gap-4">
           <button
-            onClick={() => window.location.href = '/login'}
-            className="group inline-flex items-center justify-center px-2 py-1 text-lg font-semibold rounded-lg text-white bg-blue-800 hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            onClick={() => (window.location.href = "/login")}
+            className="group inline-flex items-center gap-2 px-8 py-3 rounded-xl 
+                       bg-indigo-600 text-white hover:bg-indigo-500 transition shadow-md"
           >
-            <span className="flex items-center gap-2">
-              Get Started
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </span>
+            Get Started
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
           </button>
-        </div>
+          </div>
 
-        {/* Professional feature indicators */}
-        <div className="mt-16 flex justify-center items-center gap-8 text-slate-500">
-          <div className="flex items-center gap-2 text-sm">
-       
-            <span></span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-          
-            <span></span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-          
-            <span></span>
-          </div>
+        <div className="my-20 h-px w-full bg-slate-200" />
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 text-left">
+          <Feature icon={<ShieldCheck />} title="Secure" desc="Enterprise-grade data protection." />
+          <Feature icon={<Zap />} title="Fast" desc="Optimized for smooth performance." />
+          <Feature icon={<Users />} title="Collaborative" desc="Built for modern teams." />
+          <Feature icon={<Layers />} title="Automated" desc="Smart workflow automation." />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Feature({ icon, title, desc }) {
+  return (
+    <div className="flex gap-4">
+      <div className="text-indigo-600 mt-1">{icon}</div>
+      <div>
+        <h3 className="font-semibold text-slate-800 mb-1">{title}</h3>
+        <p className="text-sm text-slate-500">{desc}</p>
       </div>
     </div>
   );

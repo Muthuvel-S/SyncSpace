@@ -18,7 +18,7 @@ const BACKEND_BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_U
 // =================================================================================
 
 const Header = ({ user, onLogout }) => (
-    <header className="bg-black/90 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-slate-200">
+    <header className="bg-grey/90 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-slate-200">
         <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center">
                 <Link to="/dashboard" className="text-2xl md:text-3xl font-bold tracking-tigh">

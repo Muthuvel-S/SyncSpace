@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
@@ -8,21 +8,26 @@ function DocumentsList({ workspaceId, onDocumentSelect }) {
   const [documents, setDocuments] = useState([]);
   const [newDocumentTitle, setNewDocumentTitle] = useState("");
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     const token = localStorage.getItem("token");
+    if (!workspaceId || !token) return;
+
     try {
-      const res = await axios.get(`${API_BASE}/documents/workspace/${workspaceId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `${API_BASE}/documents/workspace/${workspaceId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setDocuments(res.data);
     } catch (err) {
       console.error("Error fetching documents:", err);
     }
-  };
+  }, [workspaceId]);
 
   useEffect(() => {
     fetchDocuments();
-  }, [workspaceId]);
+  }, [fetchDocuments]);
 
   const handleCreateDocument = async () => {
     const token = localStorage.getItem("token");
@@ -30,13 +35,14 @@ function DocumentsList({ workspaceId, onDocumentSelect }) {
       alert("Document title cannot be empty.");
       return;
     }
+
     try {
       const res = await axios.post(
         `${API_BASE}/documents`,
         { title: newDocumentTitle, workspaceId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setDocuments([...documents, res.data]);
+      setDocuments((prev) => [...prev, res.data]);
       setNewDocumentTitle("");
     } catch (err) {
       console.error("Error creating document:", err);
@@ -46,6 +52,7 @@ function DocumentsList({ workspaceId, onDocumentSelect }) {
   return (
     <div>
       <h3 className="text-3xl font-bold mb-4 text-center">Documents</h3>
+
       <div className="bg-white p-6 rounded-lg shadow-md mb-6">
         <h4 className="text-xl font-semibold mb-4">Create New Document</h4>
         <div className="flex flex-col sm:flex-row gap-4">
@@ -64,7 +71,7 @@ function DocumentsList({ workspaceId, onDocumentSelect }) {
           </button>
         </div>
       </div>
-      
+
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h4 className="text-xl font-semibold mb-4">Document List</h4>
         {documents.length === 0 ? (
@@ -73,10 +80,17 @@ function DocumentsList({ workspaceId, onDocumentSelect }) {
           <ul className="divide-y divide-gray-200">
             {documents.map((doc) => (
               <li key={doc._id} className="py-4">
-                <Link to="#" onClick={() => onDocumentSelect(doc._id)} className="text-lg font-medium text-gray-900 hover:text-blue-600">
+                <Link
+                  to="#"
+                  onClick={() => onDocumentSelect(doc._id)}
+                  className="text-lg font-medium text-gray-900 hover:text-blue-600"
+                >
                   {doc.title}
                 </Link>
-                <p className="text-sm text-gray-500">Created by {doc.createdBy.name} on {new Date(doc.createdAt).toLocaleDateString()}</p>
+                <p className="text-sm text-gray-500">
+                  Created by {doc.createdBy.name} on{" "}
+                  {new Date(doc.createdAt).toLocaleDateString()}
+                </p>
               </li>
             ))}
           </ul>

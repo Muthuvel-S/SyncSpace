@@ -10,7 +10,6 @@ function Welcome() {
 
   return (
     <div className="relative min-h-screen bg-slate-50 text-slate-900 font-sans">
-      {/* Main content */}
       <div
         className={`max-w-6xl mx-auto px-6 py-32 text-center transition-all duration-700 ${
           loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
@@ -38,7 +37,7 @@ function Welcome() {
             Get Started
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
           </button>
-          </div>
+        </div>
 
         <div className="my-20 h-px w-full bg-slate-200" />
 

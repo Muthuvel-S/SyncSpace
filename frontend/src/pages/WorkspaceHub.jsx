@@ -167,10 +167,19 @@ function WorkspaceHub() {
                                     <div className="bg-white p-5 rounded-xl border border-slate-200 group-hover:border-indigo-400 group-hover:shadow-lg transition-all duration-300">
                                         <div className="flex items-center gap-4">
                                             <img
-                                                src={member.profilePicture ? `${BACKEND_BASE}${member.profilePicture}` : `https://ui-avatars.com/api/?name=${member.name}`}
-                                                alt="Profile"
-                                                className="w-12 h-12 rounded-full object-cover"
-                                            />
+  src={
+    member?.profilePicture
+      ? member.profilePicture.includes("http")
+        ? member.profilePicture
+        : `${BACKEND_BASE}${member.profilePicture}`
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          member?.name || "U"
+        )}`
+  }
+  alt="Profile"
+  className="w-12 h-12 rounded-full object-cover"
+/>
+
                                             <div className="flex-1">
                                                 <p className="font-bold text-slate-800">{member.name || member.email}</p>
                                                 <p className="text-sm text-slate-500">{member.role || "Member"}</p>

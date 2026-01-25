@@ -7,11 +7,13 @@ import {
     FiLogOut, FiCopy, FiAlertCircle,
     FiCheckCircle, FiArrowRight, FiInbox, FiUsers, FiTrash, FiEdit
 } from 'react-icons/fi';
-import Modal from "../components/Modal"; // Corrected import path
+import Modal from "../components/Modal";
 
 // --- Constants ---
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-const BACKEND_BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:5000';
+const BACKEND_BASE = process.env.REACT_APP_API_URL
+    ? process.env.REACT_APP_API_URL.replace('/api', '')
+    : 'http://localhost:5000';
 
 // =================================================================================
 // --- UI Components ---
@@ -22,19 +24,33 @@ const Header = ({ user, onLogout }) => (
         <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center">
                 <Link to="/dashboard" className="text-2xl md:text-3xl font-bold tracking-tigh">
-                     <span className="text-indigo-600">Sync</span>Space
+                    <span className="text-indigo-600">Sync</span>Space
                 </Link>
+
                 <div className="flex items-center gap-4">
                     <Link to="/profile" className="flex items-center gap-3 group">
                         <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 hidden sm:block transition-colors">
                             {user?.username}
                         </span>
+
+                        {/* ✅ FIXED PROFILE IMAGE (Cloudinary + Local safe) */}
                         <img
-                            src={user?.profilePicture ? `${BACKEND_BASE}${user.profilePicture}` : `https://ui-avatars.com/api/?name=${user?.name || 'U'}&background=c7d2fe&color=3730a3`}
-                            alt="Profile"
-                            className="w-10 h-10 rounded-full object-cover ring-2 ring-offset-2 ring-transparent group-hover:ring-indigo-500 transition-all duration-300"
-                        />
+    src={
+  user?.profilePicture
+    ? user.profilePicture.includes("http")
+      ? user.profilePicture
+      : `${BACKEND_BASE}${user.profilePicture}`
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        user?.name || "U"
+      )}&background=c7d2fe&color=3730a3`
+}
+
+  alt="Profile"
+  className="w-10 h-10 rounded-full object-cover ring-2 ring-offset-2 ring-transparent group-hover:ring-indigo-500 transition-all duration-300"
+/>
+
                     </Link>
+
                     <button
                         onClick={onLogout}
                         aria-label="Logout"

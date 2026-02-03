@@ -1,30 +1,24 @@
-import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    console.log("📧 Sending email to:", to);
-    console.log("📧 Using EMAIL_USER:", process.env.EMAIL_USER);
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"SyncSpace" <${process.env.EMAIL_USER}>`,
+    const msg = {
       to,
+      from: process.env.EMAIL_FROM, // must be verified in SendGrid
       subject,
       html,
-    });
+    };
 
-    console.log("✅ Email sent successfully");
+    await sgMail.send(msg);
+    console.log("✅ Email sent successfully to:", to);
   } catch (error) {
-    console.error("❌ Email error:", error.message);
+    console.error(
+      "❌ SendGrid email error:",
+      error.response?.body || error.message
+    );
   }
 };
-
 
 export default sendEmail;

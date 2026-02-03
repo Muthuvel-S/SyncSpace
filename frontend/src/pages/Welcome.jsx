@@ -1,20 +1,28 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const text = "SyncSpace";
-const REDIRECT_TIME = 2000; // ms (match animation duration)
+const REDIRECT_TIME = 3000;
 
 function Welcome() {
   const [show, setShow] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setShow(true);
 
     const timer = setTimeout(() => {
-      window.location.href = "/login"; // change route if needed
+      const token = localStorage.getItem("token");
+
+      if (token) {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/login", { replace: true });
+      }
     }, REDIRECT_TIME);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 overflow-hidden">
@@ -22,12 +30,12 @@ function Welcome() {
         {text.split("").map((char, index) => (
           <span
             key={index}
-            className={`inline-block transition-all duration-700 ease-out
-              ${show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}
-            `}
+            className={`inline-block transition-all duration-700 ease-out ${
+              show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+            }`}
             style={{
               transitionDelay: `${index * 120}ms`,
-              color: index < 4 ? "#4f46e5" : "inherit", // Sync = indigo
+              color: index < 4 ? "#4f46e5" : "inherit",
             }}
           >
             {char}
@@ -39,4 +47,3 @@ function Welcome() {
 }
 
 export default Welcome;
-

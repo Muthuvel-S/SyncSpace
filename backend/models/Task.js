@@ -21,7 +21,7 @@ const TaskSchema = new mongoose.Schema(
       ref: "Workspace",
       required: true,
     },
-    assignedTo: [ // <-- Corrected to be an array
+    assignedTo: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

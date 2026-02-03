@@ -1,96 +1,200 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; // Snow theme for styling
+import "react-quill/dist/quill.snow.css";
 import io from "socket.io-client";
 import axios from "axios";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-const BACKEND_BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:5000';
+const API_BASE =
+  process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
+const BACKEND_BASE = process.env.REACT_APP_API_URL
+  ? process.env.REACT_APP_API_URL.replace("/api", "")
+  : "http://localhost:5000";
+
 const socket = io(BACKEND_BASE);
 
-// --- NEW: Define the custom toolbar options ---
-const quillModules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, 4, 5, 6, false] }, { 'font': [] }],
-    [{ 'size': ['small', false, 'large', 'huge'] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
-    [
-      { 'list': 'ordered' }, { 'list': 'bullet' },
-      { 'indent': '-1' }, { 'indent': '+1' }
-    ],
-    [{ 'align': [] }],
-    [{ 'color': [] }, { 'background': [] }],
-    ['link', 'image', 'video'],
-    ['clean']
-  ],
-};
-
 function DocumentEditor({ documentId }) {
-  // All state and logic remains the same
-  const [document, setDocument] = useState(null);
-  const quillRef = useRef(null);
-  const [quill, setQuill] = useState(null);
+  const [doc, setDoc] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
 
-  useEffect(() => {
-    const fetchDocument = async () => {
+  const quillRef = useRef(null);
+  const saveTimeout = useRef(null);
+
+  /* =============================
+     IMAGE UPLOAD HANDLER
+  ============================== */
+  const imageHandler = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+
       const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("image", file);
+
       try {
-        const res = await axios.get(`${API_BASE}/documents/${documentId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setDocument(res.data);
+        const res = await axios.post(
+          `${API_BASE}/uploads/editor-image`,
+          formData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const editor = quillRef.current.getEditor();
+        const range = editor.getSelection(true);
+        editor.insertEmbed(range.index, "image", res.data.imageUrl);
+        editor.setSelection(range.index + 1);
       } catch (err) {
-        console.error("Error fetching document:", err);
+        alert("Image upload failed");
       }
     };
-    fetchDocument();
+  };
+
+  /* =============================
+     QUILL CONFIG (SINGLE TOOLBAR)
+  ============================== */
+  const quillModules = useMemo(
+    () => ({
+      toolbar: {
+        container: [
+          [{ font: [] }],
+          [{ header: [1, 2, 3, false] }],
+          [{ size: ["small", false, "large", "huge"] }],
+
+          ["bold", "italic", "underline", "strike"],
+          ["blockquote", "code-block"],
+
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ indent: "-1" }, { indent: "+1" }],
+
+          [{ align: [] }],
+          [{ color: [] }, { background: [] }],
+
+          ["link", "image"],
+          ["clean"],
+        ],
+        handlers: {
+          image: imageHandler,
+        },
+      },
+      history: {
+        delay: 1000,
+        maxStack: 100,
+        userOnly: true,
+      },
+    }),
+    []
+  );
+
+  const quillFormats = [
+    "font",
+    "header",
+    "size",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "blockquote",
+    "code-block",
+    "list",
+    "bullet",
+    "indent",
+    "align",
+    "color",
+    "background",
+    "link",
+    "image",
+  ];
+
+  /* =============================
+     FETCH DOCUMENT
+  ============================== */
+  useEffect(() => {
+    const fetchDoc = async () => {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `${API_BASE}/documents/${documentId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setDoc(res.data);
+    };
+
+    fetchDoc();
   }, [documentId]);
 
+  /* =============================
+     SOCKET + AUTOSAVE
+  ============================== */
   useEffect(() => {
-    if (!document || !quillRef.current) return;
+    if (!doc || !quillRef.current) return;
+
     const editor = quillRef.current.getEditor();
-    editor.setContents(document.content);
-    setQuill(editor);
+    editor.setContents(doc.content || { ops: [] });
+
     socket.emit("join_document", documentId);
-    socket.on("document_update", (delta) => {
-      editor.setContents(delta);
-    });
+
+    const handleChange = () => {
+      setSaving(true);
+
+      const content = editor.getContents();
+      socket.emit("document_change", { documentId, delta: content });
+
+      clearTimeout(saveTimeout.current);
+      saveTimeout.current = setTimeout(async () => {
+        const token = localStorage.getItem("token");
+        await axios.put(
+          `${API_BASE}/documents/${documentId}`,
+          { content },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setSaving(false);
+        setLastSaved(new Date());
+      }, 1000);
+    };
+
+    editor.on("text-change", handleChange);
+
     return () => {
-      socket.off("document_update");
+      editor.off("text-change", handleChange);
       socket.emit("leave_document", documentId);
     };
-  }, [document, documentId]);
+  }, [doc, documentId]);
 
-  useEffect(() => {
-    if (!quill) return;
-    const handleChange = (delta, oldDelta, source) => {
-      if (source === "user") {
-        socket.emit("document_change", { documentId, delta: quill.getContents() });
-      }
-    };
-    quill.on("text-change", handleChange);
-    return () => {
-      quill.off("text-change", handleChange);
-    };
-  }, [quill, documentId]);
+  if (!doc) return <p className="text-center">Loading document…</p>;
 
-  if (!document) {
-    return <p className="text-center">Loading document...</p>;
-  }
-
-  // --- UPDATED: The JSX with the new modules and improved styling ---
+  /* =============================
+     UI
+  ============================== */
   return (
-    <div>
-      <h3 className="text-3xl font-bold mb-4">{document.title}</h3>
-      {/* The container now uses flexbox to manage height correctly */}
-      <div className="bg-white rounded-lg shadow-md h-[70vh] flex flex-col">
-        <ReactQuill
-          ref={quillRef}
-          theme="snow"
-          modules={quillModules} // Pass the custom modules here
-          className="flex-grow" // Make the editor fill the available space
-          style={{ border: 'none' }} // Optional: remove the default border
-        />
+    <div className="flex flex-col h-full bg-slate-100">
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-6 py-3 bg-white border-b">
+        <h3 className="text-xl font-semibold truncate">{doc.title}</h3>
+        <span className="text-sm text-gray-500">
+          {saving
+            ? "Saving…"
+            : lastSaved
+            ? `Saved ${lastSaved.toLocaleTimeString()}`
+            : "All changes saved"}
+        </span>
+      </div>
+
+      {/* EDITOR */}
+      <div className="flex-1 overflow-y-auto flex justify-center py-6">
+        <div className="w-full max-w-4xl bg-white shadow-sm rounded-lg border">
+          <ReactQuill
+            ref={quillRef}
+            theme="snow"
+            modules={quillModules}
+            formats={quillFormats}
+            className="min-h-[70vh]"
+          />
+        </div>
       </div>
     </div>
   );

@@ -52,6 +52,8 @@ import messageRoutes from "./routes/message.js";
 import profileRoutes from "./routes/profile.js";
 import fileRoutes from "./routes/file.js";
 import documentRoutes from "./routes/document.js";
+import uploadRoutes from "./routes/uploads.js";
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/workspaces", workspaceRoutes);
@@ -60,6 +62,8 @@ app.use("/api/messages", messageRoutes(io));
 app.use("/api/profile", profileRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/uploads", express.static("uploads"));
+app.use("/api/uploads", uploadRoutes);
 
 // =======================
 // SOCKET USER TRACKING

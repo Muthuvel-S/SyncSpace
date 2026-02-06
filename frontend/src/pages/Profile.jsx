@@ -18,9 +18,6 @@ function Profile() {
 
   const isCurrentUser = !userId;
 
-  // =========================
-  // FETCH USER
-  // =========================
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
@@ -49,9 +46,6 @@ function Profile() {
     fetchUser();
   }, [navigate, userId, isCurrentUser]);
 
-  // =========================
-  // UPLOAD IMAGE
-  // =========================
   const handleUpload = async () => {
     const token = localStorage.getItem("token");
     if (!file || !token) return alert("Select an image first");
@@ -85,9 +79,6 @@ function Profile() {
     }
   };
 
-  // =========================
-  // UPDATE TITLE
-  // =========================
   const handleUpdateTitle = async () => {
     const token = localStorage.getItem("token");
     if (!newTitle.trim()) return alert("Title cannot be empty");
@@ -112,9 +103,6 @@ function Profile() {
     navigate("/login");
   };
 
-  // =========================
-  // STATES
-  // =========================
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -125,20 +113,18 @@ function Profile() {
 
   if (error) {
     return (
-      <div className="text-center mt-10 text-red-600">
+      <div className="text-center mt-10 text-red-600 px-4">
         {error}
       </div>
     );
   }
 
-  // =========================
-  // UI
-  // =========================
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-6">
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-10">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 sm:px-6">
+      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-6 sm:p-10">
+        
         {/* TOP BAR */}
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex justify-between items-center mb-8 sm:mb-10">
           <Link to="/dashboard" className="text-blue-600 font-medium">
             ← Back
           </Link>
@@ -154,7 +140,7 @@ function Profile() {
         </div>
 
         {/* PROFILE HEADER */}
-        <div className="flex flex-col md:flex-row items-center gap-10 mb-14">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-10 mb-10 sm:mb-14 text-center md:text-left">
           <img
             src={
               user?.profilePicture
@@ -162,26 +148,27 @@ function Profile() {
                 : "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"
             }
             alt="Profile"
-            className="w-40 h-40 rounded-full object-cover border"
+            className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border"
           />
 
           <div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">
               {user.name}
             </h2>
-            <p className="text-2xl text-gray-700 font-medium mb-1">
+            <p className="text-lg sm:text-2xl text-gray-700 font-medium mb-1">
               {user.title || user.role}
             </p>
-            <p className="text-gray-600">{user.email}</p>
+            <p className="text-gray-600 break-all">{user.email}</p>
           </div>
         </div>
 
         {/* SECTIONS */}
         {isCurrentUser && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
+            
             {/* PROFILE IMAGE */}
             <div>
-              <h3 className="text-xl font-semibold mb-6">
+              <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
                 Profile Image
               </h3>
 
@@ -189,7 +176,7 @@ function Profile() {
                 Upload new photo
               </label>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                 <input
                   type="file"
                   onChange={(e) => setFile(e.target.files[0])}
@@ -199,7 +186,7 @@ function Profile() {
                 <button
                   onClick={handleUpload}
                   disabled={!file || uploading}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg disabled:opacity-50 whitespace-nowrap"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg disabled:opacity-50"
                 >
                   {uploading ? "Uploading..." : "Upload"}
                 </button>
@@ -208,7 +195,7 @@ function Profile() {
 
             {/* PROFESSIONAL DETAILS */}
             <div>
-              <h3 className="text-xl font-semibold mb-6">
+              <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
                 Professional Details
               </h3>
 
@@ -216,7 +203,7 @@ function Profile() {
                 Job title
               </label>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                 <input
                   type="text"
                   value={newTitle}
@@ -227,7 +214,7 @@ function Profile() {
 
                 <button
                   onClick={handleUpdateTitle}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg whitespace-nowrap"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg"
                 >
                   Save
                 </button>
@@ -241,3 +228,4 @@ function Profile() {
 }
 
 export default Profile;
+

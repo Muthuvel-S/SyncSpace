@@ -4,8 +4,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import {
-    FiLogOut, FiCopy, FiAlertCircle, FiPlus,
-    FiCheckCircle, FiArrowRight, FiInbox, FiUsers, FiTrash, FiEdit, FiHash
+    FiLogOut, FiCopy, FiAlertCircle,
+    FiCheckCircle, FiArrowRight, FiInbox, FiUsers, FiTrash, FiEdit
 } from 'react-icons/fi';
 import Modal from "../components/Modal";
 

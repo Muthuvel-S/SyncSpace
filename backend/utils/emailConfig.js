@@ -12,3 +12,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export default transporter;
+
+
+console.log("RENDER EMAIL_USER:", process.env.EMAIL_USER);
+console.log("RENDER EMAIL_PASS:", process.env.EMAIL_PASS);

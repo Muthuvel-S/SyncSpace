@@ -6,7 +6,7 @@ import File from "../models/File.js";
 import Message from "../models/Message.js";
 import Document from "../models/Document.js";
 import authMiddleware from "../middleware/auth.js";
-import adminAuthMiddleware from "../middleware/adminAuth.js";
+import adminAuthMiddleware from "../middleware/adminauth.js";
 import User from "../models/User.js";
 
 const router = express.Router();
